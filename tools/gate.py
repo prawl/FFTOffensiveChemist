@@ -27,6 +27,12 @@ MAX_NAME = 24      # the item/ability Name column is short; vanilla names fit we
 MAX_DESC = 200     # one flavor + one mechanics sentence
 
 
+def is_int(v):
+    # bool is an int subclass in Python, so isinstance(True, int) is True -- a JSON `true`
+    # would otherwise pass an int check and emit "<StatusEffectId>True</StatusEffectId>".
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
 def fail(errs):
     print("\nGATE FAILED:")
     for e in errs:
@@ -56,26 +62,32 @@ def main():
     for g in grenades:
         iid = g.get("id")
         tag = f"grenade {g.get('name', iid)!r}"
-        if not isinstance(iid, int):
+        if not is_int(iid):
             errs.append(f"{tag}: id must be an int"); continue
         if iid in seen_id:
             errs.append(f"{tag}: duplicate item id {iid}")
         seen_id.add(iid)
 
-        # internal id consistency (the mapping the modloader + learn menu rely on)
-        if g.get("consumableId") != iid - 240:
-            errs.append(f"{tag}: consumableId {g.get('consumableId')} != id-240 ({iid - 240})")
-        if g.get("abilityKey") != iid + 128:
-            errs.append(f"{tag}: abilityKey {g.get('abilityKey')} != id+128 ({iid + 128})")
-        if g.get("consumableId") in seen_cons:
-            errs.append(f"{tag}: duplicate consumableId {g.get('consumableId')}")
-        seen_cons.add(g.get("consumableId"))
-        if g.get("abilityKey") in seen_abil:
-            errs.append(f"{tag}: duplicate abilityKey {g.get('abilityKey')}")
-        seen_abil.add(g.get("abilityKey"))
+        # internal id consistency (the mapping the modloader + learn menu rely on). Only
+        # track for duplicates once the value is consistent, so a missing/wrong key reports
+        # one clear error instead of stacking a bogus "duplicate None" on top.
+        cid = g.get("consumableId")
+        if cid != iid - 240:
+            errs.append(f"{tag}: consumableId {cid} != id-240 ({iid - 240})")
+        elif cid in seen_cons:
+            errs.append(f"{tag}: duplicate consumableId {cid}")
+        else:
+            seen_cons.add(cid)
+        akey = g.get("abilityKey")
+        if akey != iid + 128:
+            errs.append(f"{tag}: abilityKey {akey} != id+128 ({iid + 128})")
+        elif akey in seen_abil:
+            errs.append(f"{tag}: duplicate abilityKey {akey}")
+        else:
+            seen_abil.add(akey)
 
         sid = g.get("statusEffectId")
-        if not isinstance(sid, int) or not (1 <= sid <= 255):
+        if not is_int(sid) or not (1 <= sid <= 255):
             errs.append(f"{tag}: statusEffectId {sid!r} must be a byte 1..255")
 
         for f in ("name", "status", "itemDesc", "abilityDesc"):
@@ -98,7 +110,7 @@ def main():
         shop = g.get("shop")
         if not (isinstance(shop, str) and SHOP_RE.match(shop)):
             errs.append(f"{tag}: shop {shop!r} is not a recognized ShopAvailability value")
-        if g.get("price") is not None and not (isinstance(g["price"], int) and g["price"] > 0):
+        if g.get("price") is not None and not (is_int(g["price"]) and g["price"] > 0):
             errs.append(f"{tag}: price must be a positive int")
 
     remedy = doc.get("remedy")
