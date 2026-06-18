@@ -1,0 +1,40 @@
+# .gitignore for prawl.fft.offensivechemist
+#
+# Self-contained: this repo does NOT rely on ~/.gitignore_global. Every rule the
+# project needs lives here so a fresh clone on any machine ignores the right things.
+
+# --- Python (tools/ scripts) ---
+__pycache__/
+*.pyc
+*.pyo
+
+# --- SQLite caches (decode/reference DBs; never source) ---
+*.sqlite
+
+# --- Load-bearing build inputs that are NOT committed ---
+# working/ = the pristine vanilla decode caches (item.en.sqlite + ability.en.nxd)
+# that patch_names.py / patch_ability_names.py diff their output against, plus the
+# nxd/icon scratch dirs those scripts write. See README "Pristine caches".
+working/
+
+# --- Release / packaging artifacts ---
+Publish/
+dist/
+*.zip
+
+# --- OS / editor cruft ---
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+.vs/
+.vscode/
+*.user
+
+# NOTE: mod/FFTIVC/ (generated tables + nxd + icons) IS committed -- the nxd build
+# is a manual FF16Tools step, so we preserve the built artifacts in the tree.
+
+# A case-insensitive "Icon" rule (from some global/OS ignore files) would ignore
+# our whole ui/ffto/icon/ tree on a case-insensitive filesystem. Re-include it:
+!mod/FFTIVC/data/enhanced/ui/ffto/icon/
+!mod/FFTIVC/data/enhanced/ui/ffto/icon/**

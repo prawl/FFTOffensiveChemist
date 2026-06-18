@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "note": "The only hand-edited source for the Offensive Chemist. Every generated output (the two table XMLs, the two .en.nxd name tables, and the recolored icons) is derived from this file -- do not hand-edit the generated artifacts, they get clobbered.",
+    "what": "Reworks 5 recycled cure consumables (item ids 246-250: Antidote / Eye Drops / Echo Herbs / Maiden's Kiss / Gold Needle -- all redundant once Remedy cures everything) into offensive status grenades the Chemist throws with the Item command.",
+    "formula": 56,
+    "formulaNote": "Formula 56 (DECIMAL -- FFT references list formula/effect ids in hex; always hex->dec convert) = inflict-status-on-target. Z = success rate out of 100 (Z 100 = guaranteed).",
+    "z": 100,
+    "statusIds": "StatusEffectId is the ItemOptions status id (DECIMAL): 22=Poison, 9=Blind, 10=Silence, 101=Oil, 18=Slow.",
+    "ids": "item id -> ItemConsumable row = id - 240; item id -> learn-menu ability Key = id + 128."
+  },
+  "grenades": [
+    {
+      "id": 246,
+      "consumableId": 6,
+      "abilityKey": 374,
+      "name": "Venom Flask",
+      "status": "Poison",
+      "statusEffectId": 22,
+      "itemDesc": "Distilled toxin in a fragile vial. Inflicts Poison on the target.",
+      "abilityDesc": "Hurl a Venom Flask to inflict Poison on the target.",
+      "shop": "Chapter1_Start",
+      "price": 100,
+      "shopNote": "early, spammable chip damage",
+      "iconTint": [0.27, 0.95, 0.95],
+      "iconSource": null,
+      "iconNote": "toxic yellow-green; keeps its own ei_246 shape"
+    },
+    {
+      "id": 247,
+      "consumableId": 7,
+      "abilityKey": 375,
+      "name": "Smoke Bomb",
+      "status": "Blind",
+      "statusEffectId": 9,
+      "itemDesc": "A burst of acrid smoke. Inflicts Blind on the target.",
+      "abilityDesc": "Hurl a Smoke Bomb to inflict Blind on the target.",
+      "shop": "Chapter1_Start",
+      "price": 150,
+      "shopNote": "early, neuters physical units",
+      "iconTint": [0.0, 0.0, 0.8],
+      "iconSource": 127,
+      "iconNote": "ashen grey; reuses the Spark Bomb (127) shape"
+    },
+    {
+      "id": 248,
+      "consumableId": 8,
+      "abilityKey": 376,
+      "name": "Hush Vial",
+      "status": "Silence",
+      "statusEffectId": 10,
+      "itemDesc": "A throat-stilling draught in a fragile vial. Inflicts Silence on the target.",
+      "abilityDesc": "Hurl a Hush Vial to inflict Silence on the target.",
+      "shop": "Chapter3_Start",
+      "price": 500,
+      "shopNote": "guaranteed, beats the ~65% Silence spell",
+      "iconTint": [0.55, 0.22, 1.05],
+      "iconSource": 246,
+      "iconNote": "pale silver-blue; reuses the Venom Flask (246) shape"
+    },
+    {
+      "id": 249,
+      "consumableId": 9,
+      "abilityKey": 377,
+      "name": "Oil Flask",
+      "status": "Oil",
+      "statusEffectId": 101,
+      "itemDesc": "Clinging oil. Inflicts Oil on the target, doubling the Fire damage they take.",
+      "abilityDesc": "Hurl an Oil Flask to coat the target in Oil, doubling Fire damage taken.",
+      "shop": "Chapter2_Start",
+      "price": 250,
+      "shopNote": "setup item, pays off with Fire",
+      "iconTint": [0.09, 0.6, 0.4],
+      "iconSource": 246,
+      "iconNote": "dark oily amber; reuses the Venom Flask (246) shape"
+    },
+    {
+      "id": 250,
+      "consumableId": 10,
+      "abilityKey": 378,
+      "name": "Sludge Bomb",
+      "status": "Slow",
+      "statusEffectId": 18,
+      "itemDesc": "A splash of clinging mire. Inflicts Slow on the target.",
+      "abilityDesc": "Hurl a Sludge Bomb to inflict Slow on the target.",
+      "shop": "Chapter4_Start",
+      "price": 800,
+      "shopNote": "stolen turns, late premium",
+      "iconTint": [0.22, 0.55, 0.45],
+      "iconSource": 127,
+      "iconNote": "murky olive-brown; reuses the Spark Bomb (127) shape"
+    }
+  ],
+  "remedy": {
+    "id": 252,
+    "shop": "Chapter1_Start",
+    "note": "Consequence of the rework: the 5 single-cures are now grenades, so Remedy (the cure-all) must be buyable from Chapter 1 or players lose early status-healing entirely. Drop this block if you keep the single-cures available some other way."
+  }
+}
