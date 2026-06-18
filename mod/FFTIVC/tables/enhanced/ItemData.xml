@@ -4,27 +4,27 @@
   <Version>1</Version>
   <Entries>
     <Item>
-      <Id>246</Id> <!-- Venom Flask (Poison) -- early, spammable chip damage -->
+      <Id>246</Id> <!-- Venom Flask (Poison): early, spammable chip damage -->
       <ShopAvailability>Chapter1_Start</ShopAvailability>
       <Price>100</Price>
     </Item>
     <Item>
-      <Id>247</Id> <!-- Smoke Bomb (Blind) -- early, neuters physical units -->
+      <Id>247</Id> <!-- Smoke Bomb (Blind): early, neuters physical units -->
       <ShopAvailability>Chapter1_Start</ShopAvailability>
       <Price>150</Price>
     </Item>
     <Item>
-      <Id>248</Id> <!-- Hush Vial (Silence) -- guaranteed, beats the ~65% Silence spell -->
+      <Id>248</Id> <!-- Hush Vial (Silence): guaranteed, beats the ~65% Silence spell -->
       <ShopAvailability>Chapter3_Start</ShopAvailability>
       <Price>500</Price>
     </Item>
     <Item>
-      <Id>249</Id> <!-- Oil Flask (Oil) -- setup item, pays off with Fire -->
+      <Id>249</Id> <!-- Oil Flask (Oil): setup item, pays off with Fire -->
       <ShopAvailability>Chapter2_Start</ShopAvailability>
       <Price>250</Price>
     </Item>
     <Item>
-      <Id>250</Id> <!-- Sludge Bomb (Slow) -- stolen turns, late premium -->
+      <Id>250</Id> <!-- Sludge Bomb (Slow): stolen turns, late premium -->
       <ShopAvailability>Chapter4_Start</ShopAvailability>
       <Price>800</Price>
     </Item>

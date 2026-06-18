@@ -13,6 +13,7 @@ NAME tables and the recolored icons are built by the separate FF16Tools steps (p
 patch_ability_names.py, recolor_icons.py) and shipped from their committed copies in the mod tree.
 """
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -20,20 +21,36 @@ from lib.grenades import load_grenades
 from lib.paths import MOD_TABLES
 
 
+def xml_comment(text):
+    """Make arbitrary text safe to embed in an XML comment: comments may not contain
+    '--' or end with '-' (the modloader's parser rejects the file outright otherwise)."""
+    safe = " ".join(str(text).split())          # collapse newlines/runs of whitespace
+    while "--" in safe:
+        safe = safe.replace("--", "-")
+    return safe.strip().rstrip("-").strip()
+
+
 def hdr(table):
     return (f'<?xml version="1.0" encoding="utf-8"?>\n'
-            f'<!-- built from data/grenades.json by tools/generate.py; edits get clobbered. load after other item mods. -->\n'
+            f'<!-- {xml_comment("built from data/grenades.json by tools/generate.py; edits get clobbered. load after other item mods.")} -->\n'
             f'<{table}>\n  <Version>1</Version>\n  <Entries>\n')
 
 
 def write_table(path, body):
+    # Validate well-formedness BEFORE writing: a malformed table is silently dropped by
+    # the modloader (reverting every row to vanilla), so refuse to emit one.
+    try:
+        ET.fromstring(body)
+    except ET.ParseError as e:
+        raise SystemExit(f"REFUSING TO WRITE {path.name}: generated XML is malformed ({e}).")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body, encoding="utf-8")
 
 
 def consumable_entry(g, formula, z):
+    c = xml_comment(f"item {g['id']} {g['name']}: inflict {g['status']} (ItemOptions {g['statusEffectId']})")
     return (f"    <ItemConsumable>\n"
-            f"      <Id>{g['consumableId']}</Id> <!-- item {g['id']} {g['name']}: inflict {g['status']} (ItemOptions {g['statusEffectId']}) -->\n"
+            f"      <Id>{g['consumableId']}</Id> <!-- {c} -->\n"
             f"      <Formula>{formula}</Formula>\n"
             f"      <Z>{z}</Z>\n"
             f"      <StatusEffectId>{g['statusEffectId']}</StatusEffectId>\n"
@@ -44,7 +61,7 @@ def itemdata_entry(iid, shop, price=None, comment=None):
     body = f"      <ShopAvailability>{shop}</ShopAvailability>\n" if shop else ""
     if price:
         body += f"      <Price>{price}</Price>\n"
-    tag = f" <!-- {comment} -->" if comment else ""
+    tag = f" <!-- {xml_comment(comment)} -->" if comment else ""
     return f"    <Item>\n      <Id>{iid}</Id>{tag}\n{body}    </Item>\n"
 
 
@@ -63,7 +80,7 @@ def main():
 
     # ItemData.xml -- shop timing + price (grenades), plus Remedy's early-buy bump.
     rows = "".join(itemdata_entry(g["id"], g["shop"], g.get("price"),
-                                  f"{g['name']} ({g['status']}) -- {g.get('shopNote', '')}".strip(" -"))
+                                  f"{g['name']} ({g['status']}): {g.get('shopNote', '')}".strip(": "))
                    for g in grenades)
     remedy = doc.get("remedy")
     if remedy:
