@@ -21,8 +21,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.grenades import load_grenades, plural
-from lib.nxd import encode_sqlite_to_nxd, decode_nxd_to_sqlite, deploy_nxd
-from lib.paths import ROOT, PRISTINE_ITEM_SQLITE, MOD_ITEM_NXD
+from lib.nxd import encode_sqlite_to_nxd, decode_nxd_to_sqlite, deploy_nxd, extract_from_pac
+from lib.paths import ROOT, PRISTINE_ITEM_SQLITE, MOD_ITEM_NXD, VANILLA_EN_PAC, VANILLA_PAC_DIR
 
 BUILD = ROOT / "working" / "nxd_out" / "item_build.sqlite"
 ENC_DIR = ROOT / "working" / "nxd_out"
@@ -43,6 +43,23 @@ def planned():
             "Description": g["itemDesc"],
         }
     return out
+
+
+def refresh_pristine():
+    """Decode the pristine vanilla item table STRAIGHT FROM the game pac into PRISTINE_ITEM_SQLITE.
+
+    The verify below only proves "rebuilt == pristine + the 5 grenade rows", so the baseline MUST
+    be true vanilla. A hand-placed working/ decode from a modded install (common on a box that runs
+    other item mods) silently poisons every other row of the shipped name table -- the modloader
+    merges nxd cell-level, so each stray name overrides vanilla for every player. Re-deriving from
+    the encrypted base pac on every build removes that footgun entirely."""
+    if not VANILLA_EN_PAC.exists():
+        sys.exit(f"FAIL: vanilla pac missing at {VANILLA_EN_PAC} -- need the game installed "
+                 f"(or point FFT_VANILLA_EN_PAC at 0004.en.pac). The nxd build will not trust a "
+                 f"hand-placed working/ cache as the vanilla baseline.")
+    vanilla_nxd = extract_from_pac(VANILLA_EN_PAC, "nxd/item.en.nxd", VANILLA_PAC_DIR)
+    decode_nxd_to_sqlite(vanilla_nxd, PRISTINE_ITEM_SQLITE)
+    print(f"  pristine baseline refreshed from {VANILLA_EN_PAC.name} -> {PRISTINE_ITEM_SQLITE.name}")
 
 
 def apply_patches(db, patches):
@@ -95,9 +112,8 @@ def main():
         print(f"id{key}: {cols['Name']!r} -- {cols['Description']!r}")
     if "--dry" in sys.argv:
         return
-    if not PRISTINE_ITEM_SQLITE.exists():
-        sys.exit(f"FAIL: pristine vanilla decode missing at {PRISTINE_ITEM_SQLITE} (see README 'Pristine caches')")
     ENC_DIR.mkdir(parents=True, exist_ok=True)
+    refresh_pristine()
     shutil.copy(PRISTINE_ITEM_SQLITE, BUILD)
     apply_patches(BUILD, patches)
     out_nxd = encode_sqlite_to_nxd(BUILD, ENC_DIR, "item.en.nxd")

@@ -63,6 +63,13 @@ result back and asserts that *only* those rows' cells differ from vanilla. A red
 refuses to deploy -- the modloader merges nxd tables cell-level, so any stray cell would
 silently override vanilla for every player.
 
+That guarantee is only as good as the baseline, so the builders **re-derive the pristine
+vanilla tables straight from the game's base pac** (`data/enhanced/0004.en.pac`) on every run --
+they never trust a hand-placed `working/` cache. (An earlier release shipped with the baseline
+accidentally decoded from a *modded* install, which silently renamed ~11 unrelated weapons/armor,
+e.g. Longsword showing as "Chaosbringer". Sourcing from the encrypted base pac removes that
+footgun.)
+
 ## Commands
 
 Environment note: use `python` (not `python3`). PowerShell scripts.
@@ -105,16 +112,19 @@ needed.)
 
 ### Pristine caches
 
-The two `.en.nxd` builders diff their output against the **vanilla** decode, kept locally under
-`working/` (gitignored):
+The two `.en.nxd` builders diff their output against the **vanilla** decode, which they re-derive
+from the game's base localized pac on every run -- **do not hand-populate the baseline.** Both
+`item.en.nxd` and `ability.en.nxd` live inside `data/enhanced/0004.en.pac`; `refresh_pristine()`
+in each builder extracts them with FF16Tools (`-g fft`) into `working/vanilla_pac/` and decodes
+the item table to `working/item.en.sqlite`. All of that is gitignored and regenerated, so there
+is nothing to copy between checkouts.
 
-- `working/item.en.sqlite` -- vanilla `item.en` decoded to sqlite (all 261 rows)
-- `working/nxd_ability/ability.en.nxd` -- the vanilla `ability.en` nxd
-
-On a fresh clone these are absent; recreate them by decoding the vanilla tables out of the game
-archives with FF16Tools (`-g fft`), or copy them from a checkout that has them. The pure-Python
-gate + generate + the committed mod tree do **not** need them, so a clean clone still builds and
-packages.
+This matters: a hand-placed cache decoded from a *modded* install (easy on a box that runs other
+item mods) silently poisons every other row of the shipped name table, since the modloader merges
+nxd cell-level. Sourcing the baseline from the encrypted base pac makes that impossible. The
+builders need the game installed; point `FFT_VANILLA_EN_PAC` at `0004.en.pac` for a non-default
+install. The pure-Python gate + generate + the committed mod tree do **not** need the pac, so a
+clean clone still builds and packages the tables.
 
 ## Requirements
 

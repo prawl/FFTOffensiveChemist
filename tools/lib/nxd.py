@@ -26,12 +26,29 @@ def encode_sqlite_to_nxd(sqlite, out_dir, nxd_name):
     return out
 
 
+def extract_from_pac(pac, internal_path, out_dir):
+    """Extract one file (e.g. 'nxd/item.en.nxd') out of an FF16 pac via FF16Tools; return its Path.
+
+    The base game pacs are encrypted, hence -g fft. FF16Tools preserves the internal directory
+    structure under out_dir (so 'nxd/item.en.nxd' lands at out_dir/nxd/item.en.nxd). SystemExit
+    (with the tool's output) if the expected file does not appear."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    r = subprocess.run([str(FF16), "unpack", "-i", str(pac), "-f", internal_path,
+                        "-o", str(out_dir), "-g", "fft"], capture_output=True, text=True)
+    out = out_dir / internal_path
+    if r.returncode != 0 or not out.exists():
+        raise SystemExit(f"PAC EXTRACT FAILED ({internal_path} from {pac}):\n" + r.stdout + r.stderr)
+    return out
+
+
 def decode_nxd_to_sqlite(nxd, out_sqlite):
     """Decode a single .en.nxd into a sqlite via FF16Tools; return the sqlite Path.
 
     FF16Tools takes an INPUT DIRECTORY, so the nxd is staged into a temp 'in' folder next
     to the output. SystemExit (with the decoder's output) if the sqlite does not appear."""
     out_sqlite.parent.mkdir(parents=True, exist_ok=True)
+    if out_sqlite.exists():          # FF16Tools appends to an existing db; start clean every time
+        out_sqlite.unlink()
     in_dir = out_sqlite.parent / (out_sqlite.stem + "_in")
     if in_dir.exists():
         shutil.rmtree(in_dir)

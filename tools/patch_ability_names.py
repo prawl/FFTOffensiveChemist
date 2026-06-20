@@ -26,8 +26,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.grenades import load_grenades
-from lib.nxd import encode_sqlite_to_nxd, decode_nxd_to_sqlite, deploy_nxd
-from lib.paths import ROOT, PRISTINE_ABILITY_NXD, MOD_ABILITY_NXD
+from lib.nxd import encode_sqlite_to_nxd, decode_nxd_to_sqlite, deploy_nxd, extract_from_pac
+from lib.paths import ROOT, PRISTINE_ABILITY_NXD, MOD_ABILITY_NXD, VANILLA_EN_PAC, VANILLA_PAC_DIR
 
 PRISTINE_SQLITE = ROOT / "working" / "nxd_out_ability" / "ability_pristine.sqlite"
 BUILD = ROOT / "working" / "nxd_out_ability" / "ability_build.sqlite"
@@ -39,6 +39,21 @@ def planned():
     """ability Key -> {col: value} for the 5 grenade use-abilities."""
     return {g["abilityKey"]: {"Name": g["name"], "Description": g["abilityDesc"]}
             for g in load_grenades()["grenades"]}
+
+
+def refresh_pristine():
+    """Extract the pristine vanilla ability table STRAIGHT FROM the game pac to PRISTINE_ABILITY_NXD.
+
+    Same reason as patch_names.py: the verify only proves "rebuilt == pristine + the 5 grenade
+    rows", so the baseline MUST be true vanilla. A hand-placed working/ copy from a modded install
+    silently poisons every other ability name (the modloader merges nxd cell-level). Re-deriving
+    from the encrypted base pac on every build removes that footgun."""
+    if not VANILLA_EN_PAC.exists():
+        sys.exit(f"FAIL: vanilla pac missing at {VANILLA_EN_PAC} -- need the game installed "
+                 f"(or point FFT_VANILLA_EN_PAC at 0004.en.pac). The nxd build will not trust a "
+                 f"hand-placed working/ cache as the vanilla baseline.")
+    extract_from_pac(VANILLA_EN_PAC, "nxd/ability.en.nxd", VANILLA_PAC_DIR)  # -> PRISTINE_ABILITY_NXD
+    print(f"  pristine baseline refreshed from {VANILLA_EN_PAC.name} -> {PRISTINE_ABILITY_NXD.name}")
 
 
 def apply_patches(db, patches):
@@ -91,9 +106,8 @@ def main():
         print(f"Key {key}: {cols['Name']!r} -- {cols['Description']!r}")
     if "--dry" in sys.argv:
         return
-    if not PRISTINE_ABILITY_NXD.exists():
-        sys.exit(f"FAIL: pristine vanilla nxd missing at {PRISTINE_ABILITY_NXD} (see README 'Pristine caches')")
     ENC_DIR.mkdir(parents=True, exist_ok=True)
+    refresh_pristine()
     decode_nxd_to_sqlite(PRISTINE_ABILITY_NXD, PRISTINE_SQLITE)
     shutil.copy(PRISTINE_SQLITE, BUILD)
     apply_patches(BUILD, patches)
