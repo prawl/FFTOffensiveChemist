@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 """
 Build ability.en.nxd: rename the 5 Chemist Item-command USE-abilities (Keys 374-378) to match
-the grenades, so the ability-learn menu shows "Venom Flask" instead of "Antidote".
+the grenades (so the ability-learn menu shows "Venom Flask" instead of "Antidote"), and -- when
+grenades.json sets remedy.jpCost -- restamp Remedy's learn cost (Key 380 = item id 252 + 128).
 
 The Chemist's learn menu shows the item-USE ability names, which live in the Ability-en table
 (ability.en.nxd) -- a SEPARATE table from the item names (item.en.nxd, built by patch_names.py).
-Keys 374-378 are the use-abilities for items 246-250.
+Keys 374-378 are the use-abilities for items 246-250. The SAME table holds each ability's JP learn
+cost as a 16-bit value split across two byte columns (JpCost1 low + 256*JpCost2 high; vanilla
+Remedy = 188 + 512 = 700), so Remedy's JP override is just two more cells in this one file.
 
 Same self-verifying full-table round-trip as patch_names.py: decode the PRISTINE vanilla
-ability.en.nxd, rewrite ONLY the 5 ability rows (Name + Description), re-encode, then decode the
-build back and assert exactly those cells differ from vanilla. The modloader merges nxd tables
+ability.en.nxd, rewrite ONLY the 5 grenade rows (Name + Description) plus Remedy's JpCost cells,
+re-encode, then decode the build back and assert exactly those cells differ from vanilla. The modloader merges nxd tables
 cell-level, so a vanilla-faithful rebuild with only our rows changed coexists with other installed
 ability.en.nxd mods. A red verify refuses to deploy.
 
@@ -36,9 +39,17 @@ VERIFY_SQLITE = ROOT / "working" / "nxd_out_ability" / "ability_verify.sqlite"
 
 
 def planned():
-    """ability Key -> {col: value} for the 5 grenade use-abilities."""
-    return {g["abilityKey"]: {"Name": g["name"], "Description": g["abilityDesc"]}
-            for g in load_grenades()["grenades"]}
+    """ability Key -> {col: value}: the 5 grenade use-abilities (Name + Description), plus -- when
+    grenades.json sets remedy.jpCost -- Remedy's learn cost split into its two byte columns
+    (JpCost1 = low byte, JpCost2 = high byte; e.g. 150 -> JpCost1 150, JpCost2 0)."""
+    doc = load_grenades()
+    patches = {g["abilityKey"]: {"Name": g["name"], "Description": g["abilityDesc"]}
+               for g in doc["grenades"]}
+    remedy = doc.get("remedy")
+    if remedy and remedy.get("jpCost") is not None:
+        jp = remedy["jpCost"]
+        patches[remedy["abilityKey"]] = {"JpCost1": jp & 0xFF, "JpCost2": (jp >> 8) & 0xFF}
+    return patches
 
 
 def refresh_pristine():
@@ -103,7 +114,7 @@ def verify(built_nxd, patches):
 def main():
     patches = planned()
     for key, cols in sorted(patches.items()):
-        print(f"Key {key}: {cols['Name']!r} -- {cols['Description']!r}")
+        print(f"Key {key}: " + ", ".join(f"{c}={v!r}" for c, v in cols.items()))
     if "--dry" in sys.argv:
         return
     ENC_DIR.mkdir(parents=True, exist_ok=True)

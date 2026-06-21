@@ -92,7 +92,10 @@
   ],
   "remedy": {
     "id": 252,
+    "abilityKey": 380,
     "shop": "Chapter1_Start",
-    "note": "Consequence of the rework: the 5 single-cures are now grenades, so Remedy (the cure-all) must be buyable from Chapter 1 or players lose early status-healing entirely. Drop this block if you keep the single-cures available some other way."
+    "jpCost": 150,
+    "jpNote": "Vanilla Remedy costs 700 JP to learn -- the single priciest cure -- where the 5 single-cures it now replaces cost only 70/80/120/200/250 JP each. Consolidating five cheap on-demand cures into one 700 JP gate taxes the early game, so the learn cost drops to 150 (about twice the old Antidote, under the old top single-cure). JP lives in ability.en.nxd as JpCost1 (low byte) + 256*JpCost2 (high byte); patch_ability_names.py does the split for ability Key id+128 = 380.",
+    "note": "Consequence of the rework: the 5 single-cures are now grenades, so Remedy (the cure-all) must be buyable from Chapter 1 (shop) AND cheap to learn (jpCost) or players lose early status-healing entirely. Drop jpCost to leave the learn cost at vanilla 700; drop the whole block if you keep the single-cures available some other way."
   }
 }

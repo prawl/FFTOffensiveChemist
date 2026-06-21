@@ -40,10 +40,19 @@ actually throw them -- a hoarded consumable is a dead consumable.
 
 ### Remedy moves up
 
-Repurposing the five single-cures removes early single-status healing. Remedy already cures
-every one of those statuses, so the only adjustment needed is **availability**: Remedy is bumped
-to **Chapter 1** so status-healing stays reachable from the start. No curing is lost -- it is
-just consolidated into the one item that already did the job.
+Repurposing the five single-cures removes early single-status healing. Remedy already cures every
+one of those statuses, so two adjustments keep early curing whole:
+
+- **Availability** -- the Remedy *item* is bumped to **Chapter 1** (vanilla gates it to Chapter 2,
+  around Lionel Castle), so it is buyable from the start.
+- **Learn cost** -- the Chemist learns each Item consumable as its own JP ability, and vanilla
+  Remedy costs **700 JP**: the single priciest cure, versus the **70 / 80 / 120 / 200 / 250 JP**
+  the five single-cures it replaces cost individually. Collapsing five cheap on-demand cures into
+  one 700 JP gate is a real early-game tax, so Remedy's learn cost drops to **150 JP** -- about
+  twice the old Antidote, still under the old top single-cure.
+
+Curing is consolidated and re-priced to stay reachable, not made more expensive. (The 350 gil shop
+price is already cheap and is left untouched -- the cost that bit was JP, not gil.)
 
 ## Why data-only
 

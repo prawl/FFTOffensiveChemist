@@ -19,8 +19,10 @@ Eye Drops, Echo Herbs, Maiden's Kiss, and Gold Needle. This mod recycles those f
 | 250 | **Sludge Bomb** | Slow    | Chapter 4 | 800 |
 
 Each grenade is a guaranteed (100%) single-target status throw. Because the five cures are
-gone, **Remedy** (which already cures every status) is bumped to **Chapter 1** so you never
-lose access to early status-healing.
+gone, **Remedy** (which already cures every status) is bumped to **Chapter 1** *and* its Chemist
+learn cost is cut from **700 JP to 150 JP**, so early status-healing stays reachable without a
+brutal JP gate -- vanilla locked all five replaced cures (70-250 JP each) behind one 700 JP
+ability, the single priciest cure on the Chemist's list.
 
 This is a **data-only** mod -- no DLL, no in-process code. The Chemist throws the grenades
 through the vanilla engine's Item command; the mod just repoints what those five item ids do,
@@ -39,7 +41,9 @@ The five grenades touch four game tables, all derived from one source:
 3. **`item.en.nxd`** -- renames items 246-250 (name + description) so the menu reads
    "Venom Flask", not "Antidote". Full-table file; only those five rows differ from vanilla.
 4. **`ability.en.nxd`** -- renames the Chemist's Item-command use-abilities (Keys 374-378) so
-   the ability-learn menu matches. Full-table file; only those five rows differ from vanilla.
+   the ability-learn menu matches, and restamps **Remedy**'s learn cost (Key 380) from 700 JP to
+   150 JP (JP is a 16-bit value stored as `JpCost1` + 256*`JpCost2` in this same table). Full-table
+   file; only those six rows differ from vanilla.
 
 Plus 10 recolored menu icons (a 100x100 + a 48x48 per grenade) under
 `mod/FFTIVC/data/enhanced/ui/ffto/icon/`.
@@ -103,7 +107,7 @@ result:**
 
 ```powershell
 python tools\patch_names.py           # after any name/itemDesc change
-python tools\patch_ability_names.py   # after any name/abilityDesc change
+python tools\patch_ability_names.py   # after any name/abilityDesc or remedy.jpCost change
 python tools\recolor_icons.py         # after any iconTint/iconSource change
 ```
 

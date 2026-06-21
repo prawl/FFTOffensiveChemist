@@ -114,8 +114,21 @@ def main():
             errs.append(f"{tag}: price must be a positive int")
 
     remedy = doc.get("remedy")
-    if remedy and not (isinstance(remedy.get("shop"), str) and SHOP_RE.match(remedy["shop"])):
-        errs.append(f"remedy.shop {remedy.get('shop')!r} is not a recognized ShopAvailability value")
+    if remedy:
+        if not (isinstance(remedy.get("shop"), str) and SHOP_RE.match(remedy["shop"])):
+            errs.append(f"remedy.shop {remedy.get('shop')!r} is not a recognized ShopAvailability value")
+        # JP learn-cost override (optional). When present, the ability Key must follow the same
+        # id+128 mapping the grenades use, and the value must fit the two-byte JpCost field in
+        # ability.en.nxd (stored as JpCost1 low + 256*JpCost2 high; vanilla Remedy = 188 + 512 = 700).
+        jp = remedy.get("jpCost")
+        if jp is not None:
+            rid, akey = remedy.get("id"), remedy.get("abilityKey")
+            if not is_int(rid):
+                errs.append("remedy.id must be an int when jpCost is set")
+            elif akey != rid + 128:
+                errs.append(f"remedy.abilityKey {akey} != id+128 ({rid + 128})")
+            if not (is_int(jp) and 1 <= jp <= 65535):
+                errs.append(f"remedy.jpCost {jp!r} must be an int 1..65535 (two-byte JpCost field)")
 
     if errs:
         fail(errs)
