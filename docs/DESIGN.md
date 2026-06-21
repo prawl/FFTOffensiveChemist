@@ -7,7 +7,7 @@ time you can field one, Remedy cures every status the five single-cures (Antidot
 Echo Herbs, Maiden's Kiss, Gold Needle) handle individually -- so those five items are dead
 inventory the moment Remedy shows up.
 
-This mod recycles that dead inventory into **offensive** consumables. Curing capability is
+This mod recycles that dead inventory into **offensive** consumables. Curing coverage is
 unchanged (Remedy still covers everything), but the Chemist gains a reason to throw things: a
 spread of guaranteed status grenades that scale in disruption and cost across the chapters.
 
@@ -43,16 +43,18 @@ actually throw them -- a hoarded consumable is a dead consumable.
 Repurposing the five single-cures removes early single-status healing. Remedy already cures every
 one of those statuses, so two adjustments keep early curing whole:
 
-- **Availability** -- the Remedy *item* is bumped to **Chapter 1** (vanilla gates it to Chapter 2,
-  around Lionel Castle), so it is buyable from the start.
+- **Availability** -- the Remedy *item* is bumped to **Chapter 1** from its later vanilla
+  availability, so it is buyable from the start.
 - **Learn cost** -- the Chemist learns each Item consumable as its own JP ability, and vanilla
   Remedy costs **700 JP**: the single priciest cure, versus the **70 / 80 / 120 / 200 / 250 JP**
-  the five single-cures it replaces cost individually. Collapsing five cheap on-demand cures into
-  one 700 JP gate is a real early-game tax, so Remedy's learn cost drops to **150 JP** -- about
-  twice the old Antidote, still under the old top single-cure.
+  the five single-cures it replaces cost individually (all seven figures are the vanilla values the
+  nxd self-verify reads straight from the game on every build). Collapsing five cheap on-demand
+  cures into one 700 JP gate is a real early-game tax, so Remedy's learn cost drops to **150 JP** --
+  about twice the old Antidote, still under the old top single-cure.
 
-Curing is consolidated and re-priced to stay reachable, not made more expensive. (The 350 gil shop
-price is already cheap and is left untouched -- the cost that bit was JP, not gil.)
+Curing is consolidated and re-priced to stay reachable, not made more expensive. (The Remedy item's
+gil price is left untouched -- the cost that bit was JP, not gil.) The JP cell lives in the English
+ability table, so the cut applies to English installs, matching the mod's English-only name overrides.
 
 ## Why data-only
 
@@ -69,7 +71,8 @@ isn't also editing those exact rows.
 
 ## Compatibility
 
-Load **after** other item mods so the five grenade rows win. The `.en.nxd` name tables are
-built vanilla-faithful (only the five grenade rows differ from stock), and the modloader merges
-nxd tables cell-level, so this mod coexists with other `item.en.nxd` / `ability.en.nxd` mods
-unless one of them also edits items 246-250 or abilities 374-378.
+Load **after** other item mods so the grenade rows win. The `.en.nxd` tables are built
+vanilla-faithful (only the grenade rows -- plus Remedy's JP cells in the ability table -- differ
+from stock), and the modloader merges nxd tables cell-level, so this mod coexists with other
+`item.en.nxd` / `ability.en.nxd` mods unless one of them also edits items 246-250 or abilities
+374-378 / 380.

@@ -42,8 +42,9 @@ The five grenades touch four game tables, all derived from one source:
    "Venom Flask", not "Antidote". Full-table file; only those five rows differ from vanilla.
 4. **`ability.en.nxd`** -- renames the Chemist's Item-command use-abilities (Keys 374-378) so
    the ability-learn menu matches, and restamps **Remedy**'s learn cost (Key 380) from 700 JP to
-   150 JP (JP is a 16-bit value stored as `JpCost1` + 256*`JpCost2` in this same table). Full-table
-   file; only those six rows differ from vanilla.
+   150 JP (JP is a 16-bit value stored as `JpCost1` + 256*`JpCost2` in this same table -- so, like
+   the names, the cut applies to English installs). Full-table file; only those six rows differ
+   from vanilla.
 
 Plus 10 recolored menu icons (a 100x100 + a 48x48 per grenade) under
 `mod/FFTIVC/data/enhanced/ui/ffto/icon/`.
@@ -62,8 +63,9 @@ data/grenades.json ──gate.py──────────────▶ TH
 ```
 
 The two `.en.nxd` builders are **self-verifying**: each rebuilds the whole table from the
-pristine vanilla decode, changes only the five grenade rows, re-encodes, then decodes the
-result back and asserts that *only* those rows' cells differ from vanilla. A red verify
+pristine vanilla decode, changes only the grenade rows (plus Remedy's JP cells in the ability
+table), re-encodes, then decodes the result back and asserts that *only* those cells differ
+from vanilla. A red verify
 refuses to deploy -- the modloader merges nxd tables cell-level, so any stray cell would
 silently override vanilla for every player.
 
@@ -146,7 +148,7 @@ clean clone still builds and packages the tables.
 - **`StatusEffectId` is the ItemOptions status id (decimal):** 22 = Poison, 9 = Blind,
   10 = Silence, 101 = Oil, 18 = Slow.
 - **NXD overrides are full-table files** but the modloader merges them cell-level, so shipping a
-  vanilla-faithful table with only the five grenade rows changed coexists with other installed
-  `item.en.nxd` / `ability.en.nxd` mods.
+  vanilla-faithful table with only the grenade rows (and Remedy's JP cells) changed coexists with
+  other installed `item.en.nxd` / `ability.en.nxd` mods.
 
 See `docs/DESIGN.md` for the design rationale.

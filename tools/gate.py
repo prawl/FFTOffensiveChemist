@@ -117,18 +117,18 @@ def main():
     if remedy:
         if not (isinstance(remedy.get("shop"), str) and SHOP_RE.match(remedy["shop"])):
             errs.append(f"remedy.shop {remedy.get('shop')!r} is not a recognized ShopAvailability value")
-        # JP learn-cost override (optional). When present, the ability Key must follow the same
-        # id+128 mapping the grenades use, and the value must fit the two-byte JpCost field in
-        # ability.en.nxd (stored as JpCost1 low + 256*JpCost2 high; vanilla Remedy = 188 + 512 = 700).
-        jp = remedy.get("jpCost")
-        if jp is not None:
-            rid, akey = remedy.get("id"), remedy.get("abilityKey")
+        # JP learn-cost override (optional). The ability Key must follow the same id+128 mapping the
+        # grenades use -- checked whenever an abilityKey OR jpCost is declared, so a stray key can't
+        # slip through unvalidated even before a jpCost would consume it. jpCost must fit the two-byte
+        # JpCost field in ability.en.nxd (JpCost1 low + 256*JpCost2 high; vanilla Remedy = 188+512 = 700).
+        rid, akey, jp = remedy.get("id"), remedy.get("abilityKey"), remedy.get("jpCost")
+        if akey is not None or jp is not None:
             if not is_int(rid):
-                errs.append("remedy.id must be an int when jpCost is set")
+                errs.append("remedy.id must be an int when abilityKey/jpCost is set")
             elif akey != rid + 128:
                 errs.append(f"remedy.abilityKey {akey} != id+128 ({rid + 128})")
-            if not (is_int(jp) and 1 <= jp <= 65535):
-                errs.append(f"remedy.jpCost {jp!r} must be an int 1..65535 (two-byte JpCost field)")
+        if jp is not None and not (is_int(jp) and 1 <= jp <= 65535):
+            errs.append(f"remedy.jpCost {jp!r} must be an int 1..65535 (two-byte JpCost field)")
 
     if errs:
         fail(errs)
