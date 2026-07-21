@@ -5,10 +5,10 @@
 #   BuildLinked.ps1 -> deploy straight into the live Reloaded Mods folder (this file)
 #   Publish.ps1     -> stage + zip a distributable package
 #
-# The shared pipeline prefix (gate -> generate) lives in tools/pipeline.ps1; this
-# file keeps the deploy-specific half: mods-folder resolution, the Vortex marker
-# exclusion, and deploy verification. This mod is DATA-ONLY -- table/nxd/tex
-# changes take effect on game RESTART.
+# The shared pipeline prefix (gate -> generate -> ledger tests) lives in
+# tools/pipeline.ps1; this file keeps the deploy-specific half: mods-folder
+# resolution, the Vortex marker exclusion, and deploy verification. This mod is
+# DATA-ONLY -- table/nxd/tex changes take effect on game RESTART.
 
 $ErrorActionPreference = "Stop"
 Split-Path $MyInvocation.MyCommand.Path | Push-Location
@@ -29,12 +29,16 @@ try {
     }
     $dest = Join-Path $modsDir $modId
 
-    # --- [1/3] Tables: validate data -> generate the table XMLs ---
-    Write-Host "`n[1/3] Validating + generating tables..." -ForegroundColor Yellow
+    # --- [1/4] Tables: validate data -> generate the table XMLs ---
+    Write-Host "`n[1/4] Validating + generating tables..." -ForegroundColor Yellow
     Invoke-DataPipeline -FailVerb DEPLOY
 
-    # --- [2/3] Clean the live mod folder + stage the data tree ---
-    Write-Host "[2/3] Cleaning $dest + staging data..." -ForegroundColor Yellow
+    # --- [2/4] Contract tests (the work-ledger gate) ---
+    Write-Host "[2/4] Running contract tests (FFTOffensiveChemist.Tests)..." -ForegroundColor Yellow
+    Invoke-UnitTestGate -FailVerb DEPLOY
+
+    # --- [3/4] Clean the live mod folder + stage the data tree ---
+    Write-Host "[3/4] Cleaning $dest + staging data..." -ForegroundColor Yellow
     if (Test-Path $dest) {
         # Keep the Vortex marker so Vortex doesn't treat the folder as orphaned.
         Remove-Item "$dest\*" -Exclude "__folder_managed_by_vortex" -Recurse -Force -ErrorAction SilentlyContinue
@@ -45,9 +49,9 @@ try {
     Copy-Item "$root\mod\ModConfig.json" $dest -Force
     if (Test-Path "$root\mod\preview.png") { Copy-Item "$root\mod\preview.png" $dest -Force }
 
-    # --- [3/3] Verify the deployment (fail loud on missing pieces; no silent drift) ---
+    # --- [4/4] Verify the deployment (fail loud on missing pieces; no silent drift) ---
     # Same required-file manifest Publish's Verify-Package checks (pipeline.ps1).
-    Write-Host "`n[3/3] Verifying deployment..." -ForegroundColor Cyan
+    Write-Host "`n[4/4] Verifying deployment..." -ForegroundColor Cyan
     $errs = @()
     foreach ($file in $RequiredModFiles) {
         if (-not (Test-Path (Join-Path $dest $file))) { $errs += "$file missing" }

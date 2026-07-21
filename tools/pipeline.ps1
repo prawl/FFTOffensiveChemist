@@ -4,9 +4,10 @@
 #
 # One copy, two callers, no drift -- the same split the sibling FFT mods use.
 #
-# This mod is DATA-ONLY (no DLL), so the automated pipeline is the pure-Python
-# pair: gate (validate data/grenades.json) -> generate (emit the two table XMLs).
-# Both run on CI with no FF16Tools. The .en.nxd NAME tables and the recolored
+# This mod is DATA-ONLY (no DLL), so the automated pipeline is gate (validate
+# data/grenades.json) -> generate (emit the two table XMLs) -> the ledger test
+# gate (TodoContractTests; the only .NET piece, no runtime project behind it).
+# All three run on CI with no FF16Tools. The .en.nxd NAME tables and the recolored
 # icons are rebuilt by the SEPARATE FF16Tools steps (tools/patch_names.py,
 # tools/patch_ability_names.py, tools/recolor_icons.py) and shipped from their
 # committed copies in the mod tree -- run those by hand when you edit a grenade's
@@ -61,4 +62,19 @@ function Invoke-DataPipeline {
     }
 
     Write-Host "  -> Gated + tables generated OK." -ForegroundColor Green
+}
+
+function Invoke-UnitTestGate {
+    # The contract-test gate (the work-ledger enforcement in
+    # FFTOffensiveChemist.Tests). ONE canonical flag set, so a test that passes
+    # locally passed under the same conditions everywhere.
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet('DEPLOY', 'PACKAGE')]
+        [string]$FailVerb
+    )
+
+    & dotnet test "$PipelineRepoRoot\FFTOffensiveChemist.Tests\FFTOffensiveChemist.Tests.csproj" --nologo -v q
+    if ($LASTEXITCODE -ne 0) {
+        throw "REFUSING TO ${FailVerb}: contract tests failed (see above)."
+    }
 }

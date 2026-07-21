@@ -17,6 +17,10 @@ __pycache__/
 # nxd/icon scratch dirs those scripts write. See README "Pristine caches".
 working/
 
+# --- .NET build output (FFTOffensiveChemist.Tests, the ledger contract gate) ---
+bin/
+obj/
+
 # --- Release / packaging artifacts ---
 Publish/
 dist/

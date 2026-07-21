@@ -262,6 +262,12 @@ try {
         Write-Host "  -> -SkipGenerate set; packaging committed tables as-is." -ForegroundColor Yellow
     }
 
+    # The work-ledger contract gate runs UNCONDITIONALLY (even with -SkipGenerate),
+    # same as the sibling mods run their test gate: a malformed ledger refuses to
+    # package regardless of how the tables got here.
+    Write-Status "Running contract tests (FFTOffensiveChemist.Tests)..." "Cyan"
+    Invoke-UnitTestGate -FailVerb PACKAGE
+
     Clean-BuildDirectories
     Copy-ModAssets
     $packagePath = Create-Package -ModVersion $finalVersion
