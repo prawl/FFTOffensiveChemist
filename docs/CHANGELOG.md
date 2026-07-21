@@ -8,6 +8,13 @@ with a date and no hash.
 
 ## 1.2.0 cycle
 
+- [OC-4] SHIPPED f83f9d5 2026-07-21: the build scripts now speak with one shared voice, so
+  every line says which stage is talking and a failure reads the same as in the sibling
+  mods; the runtime logger and flight recorder are recorded WONTFIX because this data-only
+  mod has no code running in the game to log. (Tech: tools/lib/say.py with the closed
+  8-verb set, Write-OcSay in tools/pipeline.ps1, docs/LOGGING.md pinned to the code by the
+  new LogContractTests inside the existing test gate; proven non-vacuous by a deliberate
+  sabotage going red, then full BuildLinked and Publish runs printing only tagged lines.)
 - [OC-1] SHIPPED b0042ce 2026-07-21: the repo now tracks its work the same way the sibling
   mods do, in one machine-checked ledger, so planned work stops living in chat logs and a
   malformed ledger refuses to deploy or package. (Tech: docs/TODO.md + docs/CHANGELOG.md +
