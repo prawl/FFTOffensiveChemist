@@ -23,6 +23,11 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
   half-empty zip could still ship; evaluate porting the sibling mods' manifest-driven content
   gate with payload floors. (Tech: floors for the 10 grenade icon .tex files and the two full
   .en.nxd name tables, on top of the current $RequiredModFiles list in tools/pipeline.ps1.)
+- [OC-5] 2026-07-21: A ledger row accidentally pasted after the Format section escapes every
+  grammar and id-uniqueness scan, because the contract tests only read entries out of the
+  Now, Backlog, and changelog sections; decide whether entry-shaped lines in Walled or
+  Format should fail the contract. Found in the ColorCustomizer sibling (its CC-17); every
+  repo sharing the ledger system has the same blind spot.
 
 ## Walled (blocked by engine / external)
 
