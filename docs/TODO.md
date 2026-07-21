@@ -28,6 +28,10 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
   Now, Backlog, and changelog sections; decide whether entry-shaped lines in Walled or
   Format should fail the contract. Found in the ColorCustomizer sibling (its CC-17); every
   repo sharing the ledger system has the same blind spot.
+  Fixed in the TreasureMaster sibling 2026-07-21 (its TM-6, commit 5569e8e) and the decision
+  there was yes, they fail the contract: an entry-shape regex swept over the non-entry
+  sections, proven by a planted stray going red and the revert going green. The port is that
+  one test with the id prefix swapped to OC.
 
 ## Walled (blocked by engine / external)
 
