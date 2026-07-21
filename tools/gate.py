@@ -21,6 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.grenades import load_grenades
+from lib.say import say, fail
 
 SHOP_RE = re.compile(r"^(Chapter[1-4]_Start|Unknown\d+)$")
 MAX_NAME = 24      # the item/ability Name column is short; vanilla names fit well under this
@@ -33,11 +34,8 @@ def is_int(v):
     return isinstance(v, int) and not isinstance(v, bool)
 
 
-def fail(errs):
-    print("\nGATE FAILED:")
-    for e in errs:
-        print(f"  X {e}")
-    sys.exit(1)
+def fail_gate(errs):
+    fail("gate", "data/grenades.json failed validation:\n" + "\n".join(f"X {e}" for e in errs))
 
 
 def check_ascii(errs, label, text):
@@ -48,7 +46,7 @@ def check_ascii(errs, label, text):
         text.encode("ascii")
     except UnicodeEncodeError:
         bad = [c for c in text if ord(c) > 127]
-        errs.append(f"{label}: non-ASCII char(s) {bad!r} (use ASCII; e.g. ' -- ' not an em dash)")
+        errs.append(f"{label}: non-ASCII char(s) {bad!r} (use plain ASCII; no em dashes or curly quotes)")
 
 
 def main():
@@ -56,7 +54,7 @@ def main():
     grenades = doc.get("grenades", [])
     errs = []
     if not grenades:
-        fail(["grenades.json has no 'grenades' array"])
+        fail_gate(["grenades.json has no 'grenades' array"])
 
     seen_id, seen_cons, seen_abil = set(), set(), set()
     for g in grenades:
@@ -131,8 +129,8 @@ def main():
             errs.append(f"remedy.jpCost {jp!r} must be an int 1..65535 (two-byte JpCost field)")
 
     if errs:
-        fail(errs)
-    print(f"  GATE PASS: {len(grenades)} grenades validated (ids/keys consistent, statuses sane, text ASCII).")
+        fail_gate(errs)
+    say("gate", f"PASS: data/grenades.json is internally consistent ({len(grenades)} grenades, ids/keys consistent, statuses sane, text ASCII).")
 
 
 if __name__ == "__main__":

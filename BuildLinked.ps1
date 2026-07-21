@@ -16,9 +16,7 @@ Split-Path $MyInvocation.MyCommand.Path | Push-Location
 
 . "$PSScriptRoot\tools\pipeline.ps1"
 
-Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "   FFT Offensive Chemist - BUILD (linked)" -ForegroundColor Cyan
-Write-Host "============================================" -ForegroundColor Cyan
+Write-OcSay deploy "BuildLinked: build + deploy into the live Reloaded mods folder." Cyan
 
 try {
     $root    = $PSScriptRoot
@@ -29,16 +27,17 @@ try {
     }
     $dest = Join-Path $modsDir $modId
 
-    # --- [1/4] Tables: validate data -> generate the table XMLs ---
-    Write-Host "`n[1/4] Validating + generating tables..." -ForegroundColor Yellow
+    # --- Tables: validate data -> generate the table XMLs (speaks with its own verbs) ---
     Invoke-DataPipeline -FailVerb DEPLOY
 
-    # --- [2/4] Contract tests (the work-ledger gate) ---
-    Write-Host "[2/4] Running contract tests (FFTOffensiveChemist.Tests)..." -ForegroundColor Yellow
+    # --- Contract tests (the work-ledger + logging gate; speaks with the test verb) ---
     Invoke-UnitTestGate -FailVerb DEPLOY
 
-    # --- [3/4] Clean the live mod folder + stage the data tree ---
-    Write-Host "[3/4] Cleaning $dest + staging data..." -ForegroundColor Yellow
+    # --- Clean the live mod folder + stage the data tree ---
+    if (Get-Process fft_enhanced -ErrorAction SilentlyContinue) {
+        Write-OcSay deploy "WARN: fft_enhanced.exe is running; the deployed data loads on the next game start." Yellow
+    }
+    Write-OcSay deploy "cleaning and staging into $dest..." Yellow
     if (Test-Path $dest) {
         # Keep the Vortex marker so Vortex doesn't treat the folder as orphaned.
         Remove-Item "$dest\*" -Exclude "__folder_managed_by_vortex" -Recurse -Force -ErrorAction SilentlyContinue
@@ -49,9 +48,9 @@ try {
     Copy-Item "$root\mod\ModConfig.json" $dest -Force
     if (Test-Path "$root\mod\preview.png") { Copy-Item "$root\mod\preview.png" $dest -Force }
 
-    # --- [4/4] Verify the deployment (fail loud on missing pieces; no silent drift) ---
+    # --- Verify the deployment (fail loud on missing pieces; no silent drift) ---
     # Same required-file manifest Publish's Verify-Package checks (pipeline.ps1).
-    Write-Host "`n[4/4] Verifying deployment..." -ForegroundColor Cyan
+    Write-OcSay deploy "verifying the deployment..."
     $errs = @()
     foreach ($file in $RequiredModFiles) {
         if (-not (Test-Path (Join-Path $dest $file))) { $errs += "$file missing" }
@@ -61,13 +60,13 @@ try {
     if ($tex.Count -lt 1) { $errs += "no .tex icon files deployed" }
 
     if ($errs.Count -gt 0) {
-        Write-Host "`nDEPLOY VERIFICATION FAILED:" -ForegroundColor Red
+        Write-OcSay deploy "FAIL: the deployment is missing required pieces:" Red
         $errs | ForEach-Object { Write-Host "  X $_" -ForegroundColor Red }
         exit 1
     }
 
-    Write-Host "`nDeployed $($xmls.Count) tables + $($tex.Count) icons -> $dest" -ForegroundColor Green
-    Write-Host "Restart the game to apply (tables + nxd + icons load on restart)." -ForegroundColor Green
+    Write-OcSay deploy "deployed $($xmls.Count) tables + $($tex.Count) icons to $dest." Green
+    Write-OcSay deploy "restart the game to apply (tables, nxd, and icons load on restart)." Green
 }
 catch {
     Write-Host "`n$_" -ForegroundColor Red

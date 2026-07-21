@@ -16,6 +16,16 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
     defaults to the placeholder 0; register the mod on Nexus and bake in the real id.)
   - Verify: a zip built with the real id follows the Nexus filename convention and Vortex shows
     its version after a hand-install; the owner confirms on the first real upload.
+- **[OC-4] Give the build scripts one shared voice, and decide against an in-game logger** (opened 2026-07-21) [BUILDING]
+  - Done means: every line the build pipeline prints says which stage is talking, in the same
+    tagged shape as the sibling mods, so a failure reads the same everywhere; and the decision
+    that this data-only mod gets no in-game logger is written down where tests protect it.
+    (Tech: tools/lib/say.py with say/warn/fail and the closed verb set gate, generate, names,
+    abilities, icons, test, deploy, package; Write-OcSay in tools/pipeline.ps1; docs/LOGGING.md;
+    runtime logger and flight recorder recorded WONTFIX there.)
+  - Verify: the new contract test goes red on a bare print or a verb-glossary drift and green
+    on the real tree, and a full deploy plus a full package run print only tagged headlines.
+    (Tech: LogContractTests sabotage check, then BuildLinked.ps1 and Publish.ps1 end to end.)
 
 ## Backlog
 

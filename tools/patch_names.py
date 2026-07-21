@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.grenades import load_grenades, plural
 from lib.nxd import encode_sqlite_to_nxd, decode_nxd_to_sqlite, deploy_nxd, extract_from_pac
 from lib.paths import ROOT, PRISTINE_ITEM_SQLITE, MOD_ITEM_NXD, VANILLA_EN_PAC, VANILLA_PAC_DIR
+from lib.say import say, fail
 
 BUILD = ROOT / "working" / "nxd_out" / "item_build.sqlite"
 ENC_DIR = ROOT / "working" / "nxd_out"
@@ -54,12 +55,12 @@ def refresh_pristine():
     merges nxd cell-level, so each stray name overrides vanilla for every player. Re-deriving from
     the encrypted base pac on every build removes that footgun entirely."""
     if not VANILLA_EN_PAC.exists():
-        sys.exit(f"FAIL: vanilla pac missing at {VANILLA_EN_PAC} -- need the game installed "
-                 f"(or point FFT_VANILLA_EN_PAC at 0004.en.pac). The nxd build will not trust a "
-                 f"hand-placed working/ cache as the vanilla baseline.")
+        fail("names", f"vanilla pac missing at {VANILLA_EN_PAC}: the game must be installed "
+                      f"(or point FFT_VANILLA_EN_PAC at 0004.en.pac). The nxd build will not trust a "
+                      f"hand-placed working/ cache as the vanilla baseline.")
     vanilla_nxd = extract_from_pac(VANILLA_EN_PAC, "nxd/item.en.nxd", VANILLA_PAC_DIR)
     decode_nxd_to_sqlite(vanilla_nxd, PRISTINE_ITEM_SQLITE)
-    print(f"  pristine baseline refreshed from {VANILLA_EN_PAC.name} -> {PRISTINE_ITEM_SQLITE.name}")
+    say("names", f"pristine baseline refreshed from {VANILLA_EN_PAC.name} into {PRISTINE_ITEM_SQLITE.name}.")
 
 
 def apply_patches(db, patches):
@@ -68,7 +69,7 @@ def apply_patches(db, patches):
         sets = ", ".join(f'"{c}" = ?' for c in cols)
         con.execute(f'UPDATE "Item-en" SET {sets} WHERE Key = ?', [*cols.values(), key])
         if con.execute("SELECT changes()").fetchone()[0] != 1:
-            sys.exit(f"FAIL: item Key {key} did not update exactly one row (is working/item.en.sqlite the vanilla decode?)")
+            fail("names", f"item Key {key} did not update exactly one row (is working/item.en.sqlite the vanilla decode?)")
     con.commit()
     con.close()
 
@@ -85,7 +86,7 @@ def verify(built_nxd, patches):
     decode_nxd_to_sqlite(built_nxd, VERIFY_SQLITE)
     vanilla, rebuilt = rows(PRISTINE_ITEM_SQLITE), rows(VERIFY_SQLITE)
     if set(vanilla) != set(rebuilt):
-        sys.exit(f"FAIL: row-key sets differ (vanilla {len(vanilla)} vs rebuilt {len(rebuilt)})")
+        fail("names", f"row-key sets differ (vanilla {len(vanilla)} vs rebuilt {len(rebuilt)})")
     unexpected = []
     for key, vrow in vanilla.items():
         for col, vval in vrow.items():
@@ -96,20 +97,20 @@ def verify(built_nxd, patches):
                 continue
             unexpected.append((key, col, vval, nval))
     if unexpected:
-        for key, col, vval, nval in unexpected[:20]:
-            print(f"  UNEXPECTED diff Key {key} {col}: {vval!r} -> {nval!r}")
-        sys.exit(f"FAIL: {len(unexpected)} unexpected cell diffs -- refusing to deploy")
+        detail = "\n".join(f"UNEXPECTED diff Key {key} {col}: {vval!r} became {nval!r}"
+                           for key, col, vval, nval in unexpected[:20])
+        fail("names", f"{len(unexpected)} unexpected cell diffs; refusing to deploy:\n" + detail)
     for key, cols in patches.items():
         for col, val in cols.items():
             if rebuilt[key][col] != val:
-                sys.exit(f"FAIL: Key {key} {col} did not land in the rebuilt table")
-    print(f"  verify PASS: only the intended {sum(len(c) for c in patches.values())} cells differ from vanilla")
+                fail("names", f"Key {key} {col} did not land in the rebuilt table")
+    say("names", f"PASS: item.en.nxd rebuilt; only the intended {sum(len(c) for c in patches.values())} cells differ from vanilla.")
 
 
 def main():
     patches = planned()
     for key, cols in sorted(patches.items()):
-        print(f"id{key}: {cols['Name']!r} -- {cols['Description']!r}")
+        say("names", f"id{key} plan: {cols['Name']!r} ({cols['Description']!r})")
     if "--dry" in sys.argv:
         return
     ENC_DIR.mkdir(parents=True, exist_ok=True)
@@ -119,7 +120,7 @@ def main():
     out_nxd = encode_sqlite_to_nxd(BUILD, ENC_DIR, "item.en.nxd")
     verify(out_nxd, patches)
     deploy_nxd(out_nxd, MOD_ITEM_NXD)
-    print(f"deployed -> {MOD_ITEM_NXD} ({out_nxd.stat().st_size} bytes)")
+    say("names", f"deployed to {MOD_ITEM_NXD} ({out_nxd.stat().st_size} bytes).")
 
 
 if __name__ == "__main__":

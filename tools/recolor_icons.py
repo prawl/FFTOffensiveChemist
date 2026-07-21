@@ -21,6 +21,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.grenades import load_grenades
 from lib.paths import ROOT, FF16, VANILLA_ICONS, MOD_ICON_DIR
+from lib.say import say, warn
 
 WORK = ROOT / "working" / "icons"
 
@@ -39,6 +40,7 @@ def recolor(im, hue, sat, val_mult):
 
 
 def process(item_id, hue, sat, val_mult, src_id=None):
+    written = 0
     WORK.mkdir(parents=True, exist_ok=True)
     sid = item_id if src_id is None else src_id
     for sub, pfx in [("equip_item", "ei"), ("equip_item_s", "ei_s")]:
@@ -46,7 +48,7 @@ def process(item_id, hue, sat, val_mult, src_id=None):
         out_name = f"{pfx}_{item_id:03d}_uitx"
         src = VANILLA_ICONS / sub / "texture" / f"{src_name}.tex"
         if not src.exists():
-            print(f"  MISSING {src}"); continue
+            warn("icons", f"vanilla icon missing at {src}; skipped."); continue
         work_tex = WORK / f"{src_name}.tex"
         shutil.copy(src, work_tex)
         subprocess.run([str(FF16), "tex-conv", "-i", str(work_tex)], capture_output=True)
@@ -59,18 +61,21 @@ def process(item_id, hue, sat, val_mult, src_id=None):
         dst = MOD_ICON_DIR / sub / "texture"
         dst.mkdir(parents=True, exist_ok=True)
         shutil.move(str(WORK / f"{out_name}.tex"), str(dst / f"{out_name}.tex"))
-        print(f"  {out_name}" + (f" (from {src_name})" if src_id is not None else "") + f" -> {sub}")
+        say("icons", f"wrote {out_name} to {sub}" + (f" (shape from {src_name})" if src_id is not None else "") + ".")
+        written += 1
+    return written
 
 
 def main():
     only = set(int(a) for a in sys.argv[1:] if a.isdigit())
+    total = 0
     for g in load_grenades()["grenades"]:
         if only and g["id"] not in only:
             continue
         h, s, v = g["iconTint"]
-        print(f"id{g['id']} ({g['name']}):")
-        process(g["id"], h, s, v, g.get("iconSource"))
-    print("Done. Recolored icons placed in the mod tree.")
+        say("icons", f"recoloring id{g['id']} ({g['name']})...")
+        total += process(g["id"], h, s, v, g.get("iconSource"))
+    say("icons", f"{total} recolored icons placed in the mod tree.")
 
 
 if __name__ == "__main__":

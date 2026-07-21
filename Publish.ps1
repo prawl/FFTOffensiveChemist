@@ -57,14 +57,11 @@ if (-not $OutputPath) {
 . "$PSScriptRoot\tools\pipeline.ps1"
 
 ## => Functions <= ##
-function Write-Status {
-    param($Message, $Color = "Green")
-    Write-Host "`n==> $Message" -ForegroundColor $Color
-}
-
+# Headlines go through Write-OcSay (tools/pipeline.ps1; docs/LOGGING.md is the contract).
+# Indented "  -> " lines are continuation detail under the previous headline.
 function Write-ErrorMessage {
     param($Message)
-    throw $Message
+    throw "[Offensive Chemist] [package] FAIL: $Message"
 }
 
 function Get-ModVersion {
@@ -86,7 +83,7 @@ function Get-ModVersion {
 }
 
 function Clean-BuildDirectories {
-    Write-Status "Cleaning build directory..." "Yellow"
+    Write-OcSay package "cleaning the build directory..." Yellow
     if (Test-Path $BuildOutputPath) {
         Remove-Item "$BuildOutputPath\*" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
     } else {
@@ -95,7 +92,7 @@ function Clean-BuildDirectories {
 }
 
 function Copy-ModAssets {
-    Write-Status "Staging mod deliverables..." "Cyan"
+    Write-OcSay package "staging the mod deliverables..." Cyan
 
     if (-not (Test-Path $SourceModConfig)) {
         Write-ErrorMessage "ModConfig.json not found at: $SourceModConfig"
@@ -127,7 +124,7 @@ function Copy-ModAssets {
 
 function Create-Package {
     param([string]$ModVersion)
-    Write-Status "Creating ZIP package..." "Green"
+    Write-OcSay package "creating the ZIP package..." Green
 
     $versionDashed = $ModVersion -replace '\.', '-'
     if ($NexusModId -gt 0) {
@@ -171,26 +168,24 @@ function Create-Package {
 
         if (Test-Path $absolutePackagePath) {
             $sizeMB = [math]::Round((Get-Item $absolutePackagePath).Length / 1MB, 2)
-            Write-Host "  -> Package created successfully!" -ForegroundColor Green
-            Write-Host "  -> Size: $sizeMB MB" -ForegroundColor Cyan
-            Write-Host "  -> Location: $absolutePackagePath" -ForegroundColor Cyan
+            Write-OcSay package "created $packageName ($sizeMB MB) at $absolutePackagePath." Green
             return $absolutePackagePath
         } else {
             Write-ErrorMessage "Package was not created at: $absolutePackagePath"
         }
     }
     catch {
-        Write-Host "`n[ERROR] Failed to create ZIP package: $_" -ForegroundColor Red
+        Write-OcSay package "FAIL: could not create the ZIP package: $_" Red
         return $null
     }
 }
 
 function Verify-Package {
     param([string]$PackagePath)
-    Write-Status "Verifying package contents..." "Cyan"
+    Write-OcSay package "verifying the package contents..." Cyan
 
     if (-not $PackagePath -or -not (Test-Path $PackagePath)) {
-        Write-Host "  -> Package not found for verification" -ForegroundColor Red
+        Write-OcSay package "FAIL: no package found to verify." Red
         return $false
     }
     Add-Type -Assembly System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
@@ -230,22 +225,20 @@ function Verify-Package {
         $zip.Dispose()
     }
     catch {
-        Write-Host "`n[ERROR] Failed to verify package: $_" -ForegroundColor Red
+        Write-OcSay package "FAIL: could not verify the package: $_" Red
         return $false
     }
 
     if ($missingCount -gt 0) {
-        Write-Host "`n[FAIL] Verification failed: $missingCount required entries missing." -ForegroundColor Red
+        Write-OcSay package "FAIL: $missingCount required entries missing from the zip." Red
         return $false
     }
-    Write-Host "`n[PASS] All required entries present." -ForegroundColor Green
+    Write-OcSay package "PASS: all required entries present in the zip." Green
     return $true
 }
 
 ## => Main Script <= ##
-Write-Host "`n=====================================" -ForegroundColor Magenta
-Write-Host "    FFT Offensive Chemist - Publisher " -ForegroundColor Magenta
-Write-Host "=====================================" -ForegroundColor Magenta
+Write-OcSay package "Publish: build and package the release zip." Magenta
 
 $originalLocation = Get-Location
 Split-Path $MyInvocation.MyCommand.Path | Push-Location
@@ -256,16 +249,14 @@ try {
     $finalVersion = Get-ModVersion -RequestedVersion $Version
 
     if (-not $SkipGenerate) {
-        Write-Status "Validating data + regenerating tables..." "Cyan"
         Invoke-DataPipeline -FailVerb PACKAGE
     } else {
-        Write-Host "  -> -SkipGenerate set; packaging committed tables as-is." -ForegroundColor Yellow
+        Write-OcSay package "-SkipGenerate set; packaging the committed tables as-is." Yellow
     }
 
     # The work-ledger contract gate runs UNCONDITIONALLY (even with -SkipGenerate),
     # same as the sibling mods run their test gate: a malformed ledger refuses to
     # package regardless of how the tables got here.
-    Write-Status "Running contract tests (FFTOffensiveChemist.Tests)..." "Cyan"
     Invoke-UnitTestGate -FailVerb PACKAGE
 
     Clean-BuildDirectories
@@ -275,7 +266,7 @@ try {
     if ($packagePath) {
         $verifyOk = Verify-Package -PackagePath $packagePath
         if (-not $verifyOk) {
-            Write-Status "Publishing failed - package verification failed" "Red"
+            Write-OcSay package "FAIL: publishing stopped; the package failed verification." Red
             $exitCode = 1
         } else {
             if ($env:GITHUB_OUTPUT) {
@@ -283,13 +274,11 @@ try {
                 Add-Content -Path $env:GITHUB_OUTPUT -Value "zip=$zipFilename"
                 Write-Host "  -> Set GHA output: zip=$zipFilename" -ForegroundColor Cyan
             }
-            Write-Status "Publishing completed successfully!" "Green"
-            Write-Host "`nPackage ready at: $packagePath" -ForegroundColor Yellow
-            Write-Host "Version: $finalVersion" -ForegroundColor Yellow
+            Write-OcSay package "PASS: publish complete; version $finalVersion ready at $packagePath." Green
             $exitCode = 0
         }
     } else {
-        Write-Status "Publishing failed - package creation unsuccessful" "Red"
+        Write-OcSay package "FAIL: publishing stopped; the package was not created." Red
         $exitCode = 1
     }
 }

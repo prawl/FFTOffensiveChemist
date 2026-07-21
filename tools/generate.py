@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.grenades import load_grenades
 from lib.paths import MOD_TABLES
+from lib.say import say, fail
 
 
 def xml_comment(text):
@@ -42,7 +43,7 @@ def write_table(path, body):
     try:
         ET.fromstring(body)
     except ET.ParseError as e:
-        raise SystemExit(f"REFUSING TO WRITE {path.name}: generated XML is malformed ({e}).")
+        fail("generate", f"{path.name} not written: the generated XML is malformed ({e}); nothing was emitted.")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body, encoding="utf-8")
 
@@ -76,7 +77,6 @@ def main():
     body = "".join(consumable_entry(g, formula, z) for g in grenades)
     write_table(MOD_TABLES / "ItemConsumableData.xml",
                 hdr("ItemConsumableTable") + body + "  </Entries>\n</ItemConsumableTable>\n")
-    print(f"  wrote ItemConsumableData.xml ({len(grenades)} grenade rows)")
 
     # ItemData.xml -- shop timing + price (grenades), plus Remedy's early-buy bump.
     rows = "".join(itemdata_entry(g["id"], g["shop"], g.get("price"),
@@ -89,7 +89,8 @@ def main():
     write_table(MOD_TABLES / "ItemData.xml",
                 hdr("ItemTable") + rows + "  </Entries>\n</ItemTable>\n")
     n_extra = 1 if remedy else 0
-    print(f"  wrote ItemData.xml ({len(grenades)} grenade shop rows + {n_extra} Remedy override)")
+    say("generate", f"the two sparse table XMLs were rebuilt from grenades.json "
+                    f"({len(grenades)} grenade rows; {len(grenades)} shop rows + {n_extra} Remedy override).")
 
 
 if __name__ == "__main__":
