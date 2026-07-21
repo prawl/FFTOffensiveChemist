@@ -12,8 +12,9 @@ in scope yet; the owner locks any player-facing scope separately.
 ## IN (ship gate; every box green = ship)
 
 ### 1. Work-ledger system (OC-1)
-- [ ] docs/TODO.md + docs/CHANGELOG.md + TodoContractTests enforce the ledger contract, wired
-      into BuildLinked.ps1 / Publish.ps1 / CI as a hard gate; suite green.
+- [x] docs/TODO.md + docs/CHANGELOG.md + TodoContractTests enforce the ledger contract, wired
+      into BuildLinked.ps1 / Publish.ps1 / CI as a hard gate; suite green (shipped b0042ce,
+      2026-07-21).
 
 ### 2. Nexus identity (OC-2)
 - [ ] The release zip carries the real Nexus mod id (the NexusModId placeholder 0 replaced) so

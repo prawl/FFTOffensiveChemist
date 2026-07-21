@@ -10,15 +10,6 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
 
 ## Now (release: 1.2.0)
 
-- **[OC-1] Adopt the work ledger so planned work stops living in chat logs** (opened 2026-07-21) [BUILDING]
-  - Done means: this repo tracks its work the same way the sibling FFT mods do: a TODO ledger
-    and a changelog exist, a test suite rejects malformed entries, and both build scripts refuse
-    to deploy or package while that suite is red. (Tech: docs/TODO.md + docs/CHANGELOG.md +
-    TodoContractTests in the new FFTOffensiveChemist.Tests project, run by BuildLinked.ps1 and
-    Publish.ps1 via Invoke-UnitTestGate in tools/pipeline.ps1; CI hits it through Publish.ps1.)
-  - Verify: the test run is green, and deliberately breaking a ledger line turns it red, then
-    green again once restored. (Tech: dotnet test on FFTOffensiveChemist.Tests; sabotage
-    performed 2026-07-21 by mangling a changelog entry's opening bracket.)
 - **[OC-2] Give the mod its real Nexus identity before any Nexus upload** (opened 2026-07-21) [QUEUED]
   - Done means: the release zip is named so Vortex can read the mod's id and version instead of
     showing a warning icon with no version. (Tech: Publish.ps1's NexusModId parameter still
