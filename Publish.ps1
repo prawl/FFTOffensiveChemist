@@ -218,12 +218,13 @@ function Verify-Package {
             }
         }
 
-        $iconRoot = "FFTIVC/data/enhanced/ui/ffto/icon"
-        $texEntries = @($entryPaths | Where-Object { $_.StartsWith("$iconRoot/") -and $_.EndsWith('.tex') })
+        # $RequiredIconRoot comes from tools/pipeline.ps1 (shared with BuildLinked's
+        # deploy verification, so the two icon checks cannot drift).
+        $texEntries = @($entryPaths | Where-Object { $_.StartsWith("$RequiredIconRoot/") -and $_.EndsWith('.tex') })
         if ($texEntries.Count -gt 0) {
-            Write-Host "  [OK] $iconRoot (with $($texEntries.Count) .tex files)" -ForegroundColor Green
+            Write-Host "  [OK] $RequiredIconRoot (with $($texEntries.Count) .tex files)" -ForegroundColor Green
         } else {
-            Write-Host "  [MISSING] $iconRoot (expected .tex icon files, found 0)" -ForegroundColor Red
+            Write-Host "  [MISSING] $RequiredIconRoot (expected .tex icon files, found 0)" -ForegroundColor Red
             $missingCount++
         }
         $zip.Dispose()

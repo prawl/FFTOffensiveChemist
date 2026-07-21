@@ -29,6 +29,11 @@ $RequiredModFiles = @(
     "FFTIVC/data/enhanced/nxd/ability.en.nxd"
 )
 
+# The recolored grenade icons live under this tree; both verifiers require at
+# least one .tex here (the exact filenames are generated, so the floor is the
+# check, not a name list). One constant, two callers, no drift.
+$RequiredIconRoot = "FFTIVC/data/enhanced/ui/ffto/icon"
+
 function Invoke-DataPipeline {
     # gate -> generate, with uniform exit-code checks. Throws on any red step; the
     # caller's catch turns that into a nonzero exit. Missing python is a hard

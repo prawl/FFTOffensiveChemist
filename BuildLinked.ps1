@@ -53,7 +53,7 @@ try {
         if (-not (Test-Path (Join-Path $dest $file))) { $errs += "$file missing" }
     }
     $xmls = @(Get-ChildItem "$dest\FFTIVC\tables\enhanced\*.xml" -ErrorAction SilentlyContinue)
-    $tex  = @(Get-ChildItem "$dest\FFTIVC\data\enhanced\ui\ffto\icon" -Filter *.tex -Recurse -ErrorAction SilentlyContinue)
+    $tex  = @(Get-ChildItem (Join-Path $dest ($RequiredIconRoot -replace '/', '\')) -Filter *.tex -Recurse -ErrorAction SilentlyContinue)
     if ($tex.Count -lt 1) { $errs += "no .tex icon files deployed" }
 
     if ($errs.Count -gt 0) {
