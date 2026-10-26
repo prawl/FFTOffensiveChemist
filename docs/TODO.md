@@ -32,6 +32,13 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
   there was yes, they fail the contract: an entry-shape regex swept over the non-entry
   sections, proven by a planted stray going red and the revert going green. The port is that
   one test with the id prefix swapped to OC.
+- [OC-7] 2026-10-26: A Linux player who unzips a release built on the Windows desktop gets loose
+  files named with backslashes instead of a prawl.fft.offensivechemist folder, so Reloaded never
+  sees the mod; the GitHub CI zip is unaffected because pwsh writes forward slashes. Found live
+  on the TreasureMaster sibling 2026-10-19 and fixed there as TM-9 (commit a7ee82b), the same
+  fix ColorCustomizer carries. (Tech: Publish.ps1 line 165 uses ZipFile.CreateFromDirectory
+  under Windows PowerShell 5.1, which writes backslash separators into entry names; write the
+  entries by hand with '/' and make Verify-Package fail on any backslash.)
 
 ## Walled (blocked by engine / external)
 
