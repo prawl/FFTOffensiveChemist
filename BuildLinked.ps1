@@ -5,7 +5,7 @@
 #   BuildLinked.ps1 -> deploy straight into the live Reloaded Mods folder (this file)
 #   Publish.ps1     -> stage + zip a distributable package
 #
-# The shared pipeline prefix (gate -> generate -> ledger tests) lives in
+# The shared pipeline prefix (gate -> generate -> the shared gates) lives in
 # tools/pipeline.ps1; this file keeps the deploy-specific half: mods-folder
 # resolution, the Vortex marker exclusion, and deploy verification. This mod is
 # DATA-ONLY -- table/nxd/tex changes take effect on game RESTART.
@@ -30,8 +30,8 @@ try {
     # --- Tables: validate data -> generate the table XMLs (speaks with its own verbs) ---
     Invoke-DataPipeline -FailVerb DEPLOY
 
-    # --- Contract tests (the work-ledger + logging gate; speaks with the test verb) ---
-    Invoke-UnitTestGate -FailVerb DEPLOY
+    # --- The shared gates (rulebook manifest, format, contract tests, temp leftovers) ---
+    Invoke-SharedGates -FailVerb DEPLOY
 
     # --- Clean the live mod folder + stage the data tree ---
     if (Get-Process fft_enhanced -ErrorAction SilentlyContinue) {

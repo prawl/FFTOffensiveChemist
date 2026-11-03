@@ -10,18 +10,22 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
 
 ## Now (release: 1.2.0)
 
-- **[OC-18] Take the shared rulebook so this mod builds under the same rules as the others** (opened 2026-11-02) [QUEUED]
-  - Done means: the mod carries gates/ as a subtree with its rules.json, compiles the shared logger
-    and tests in, imports the shared build settings and style file, and every gate runs green
-    locally and in CI with today's numbers recorded as the floor. No gameplay code changes. (Tech:
-    the hookup steps in gates/README.md; rules.json names prod, tests, projects and the OC prefix;
-    floor.json and the comment budget baseline come from today's files.)
-  - Verify: BuildLinked.ps1 and CI green on the hookup commit; the health numbers equal what the
-    repo's own copy printed before the swap; the build log names the rulebook version.
+- **[OC-18] Take the shared rulebook so this mod builds under the same rules as the others** (opened 2026-11-02) [BUILDING]
+  - Done means: the mod carries gates/ as a subtree with its rules.json, compiles the shared
+    ledger, style and comment contracts into its test project, imports the shared build settings
+    and style files, and every gate runs green locally and in CI. The shared logger and the code
+    health floor do not apply, since this data-only mod has no C# to log from or to measure; the
+    build voice contract stays local. No gameplay code changes. (Tech: the hookup steps in
+    gates/README.md; rules.json names tools/ as prod, the test project and the OC prefix; the
+    linked tests are TodoContractTests, StyleContractTests and CommentContractTests plus their
+    helpers; the pipeline runs the manifest, format, unit test and temp leftover gates.)
+  - Verify: BuildLinked.ps1 and CI green on the hookup commit; the build log names the rulebook
+    version; a stray ledger row planted under Format goes red and its removal goes green.
 
 ## Backlog
 
-- [OC-2] 2026-07-21: Give the mod its real Nexus identity before any Nexus upload. Parked 2026-11-02 by the owner's quality pause; it was QUEUED in Now.
+- [OC-2] 2026-07-21: Give the mod its real Nexus identity before any Nexus upload. Parked
+  2026-11-02 by the owner's quality pause; it was QUEUED in Now.
   - Done means: the release zip is named so Vortex can read the mod's id and version instead of
     showing a warning icon with no version. (Tech: Publish.ps1's NexusModId parameter still
     defaults to the placeholder 0; register the mod on Nexus and bake in the real id.)

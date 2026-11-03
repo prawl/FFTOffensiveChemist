@@ -18,7 +18,9 @@ Python tools speak through tools/lib/say.py, which offers exactly three calls: s
 ordinary progress line), warn (prefixed WARN:, the run continues), and fail (prefixed FAIL:,
 printed to stderr, exits 1). PowerShell scripts speak through Write-OcSay in
 tools/pipeline.ps1. Bare print() anywhere under tools/ is a contract violation
-(LogContractTests source-scans for it).
+(LogContractTests source-scans for it). The one exception is the rulebook's own gate
+functions under gates/, which print a single [gates] line naming the rulebook version; that
+line is the rulebook's voice, shared by every mod on it.
 
 Indented lines that start with spaces (like "  -> Copying..." or "  X missing file") are
 continuation detail under the previous headline and stay bare. Verify habits keep their
@@ -39,7 +41,7 @@ have.
 | `[names]` | tools/patch_names.py item.en.nxd rebuild | PASS with the self-verify result, or FAIL |
 | `[abilities]` | tools/patch_ability_names.py ability.en.nxd rebuild | PASS with the self-verify result, or FAIL |
 | `[icons]` | tools/recolor_icons.py grenade icon recolor | one line per icon written; WARN when a vanilla source is missing |
-| `[test]` | the contract-test gate (dotnet test) as reported by the pipeline | PASS or FAIL from the exit code |
+| `[test]` | the shared gates (rulebook manifest, format, contract tests, temp leftovers) as reported by the pipeline | PASS or FAIL from the exit code |
 | `[deploy]` | BuildLinked.ps1 staging into the live mods folder | one summary line naming the destination; WARN if the game is running |
 | `[package]` | Publish.ps1 zip assembly | one line naming the zip and its size |
 

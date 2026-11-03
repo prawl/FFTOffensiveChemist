@@ -54,7 +54,8 @@ one of those statuses, so two adjustments keep early curing whole:
 
 Curing is consolidated and re-priced to stay reachable, not made more expensive. (The Remedy item's
 gil price is left untouched -- the cost that bit was JP, not gil.) The JP cell lives in the English
-ability table, so the cut applies to English installs, matching the mod's English-only name overrides.
+ability table, so the cut applies to English installs, matching the mod's English-only name
+overrides.
 
 ## Why data-only
 

@@ -254,10 +254,10 @@ try {
         Write-OcSay package "-SkipGenerate set; packaging the committed tables as-is." Yellow
     }
 
-    # The work-ledger contract gate runs UNCONDITIONALLY (even with -SkipGenerate),
-    # same as the sibling mods run their test gate: a malformed ledger refuses to
+    # The shared gates run UNCONDITIONALLY (even with -SkipGenerate), same as the
+    # sibling mods: a malformed ledger or a drifted rulebook copy refuses to
     # package regardless of how the tables got here.
-    Invoke-UnitTestGate -FailVerb PACKAGE
+    Invoke-SharedGates -FailVerb PACKAGE
 
     Clean-BuildDirectories
     Copy-ModAssets

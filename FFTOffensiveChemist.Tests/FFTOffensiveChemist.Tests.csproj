@@ -1,21 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Contract-test project only: this mod is data-only (no runtime DLL), so there is
-       no ProjectReference here. The suite enforces the work-ledger contract
-       (docs/TODO.md + docs/CHANGELOG.md); BuildLinked.ps1 and Publish.ps1 run it as a
-       hard gate via Invoke-UnitTestGate (tools/pipeline.ps1). -->
+  <!-- Contract tests only. This mod is data-only, with no runtime DLL to reference. The
+       rulebook's ledger, style and comment contracts compile in from gates/ as linked source
+       with the helpers they read the repo through. The build voice contract stays local,
+       since it reads tools/lib/say.py rather than a C# logger. The build settings come from
+       the root Directory.Build.targets. -->
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\gates\Tests\RepoRoot.cs;..\gates\Tests\Rules.cs;..\gates\Tests\Ledger.cs;..\gates\Tests\LogScan.cs;..\gates\Tests\TodoContractTests.cs;..\gates\Tests\StyleContractTests.cs;..\gates\Tests\CommentContractTests.cs" Link="Gates\Tests\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,10 @@
+{
+  "prod": "tools/",
+  "tests": "FFTOffensiveChemist.Tests/",
+  "ticketPrefix": "OC",
+  "projects": ["FFTOffensiveChemist.Tests/FFTOffensiveChemist.Tests.csproj"],
+  "testProjects": ["FFTOffensiveChemist.Tests/FFTOffensiveChemist.Tests.csproj"],
+  "modConfig": "mod/ModConfig.json",
+  "tempPrefixes": [],
+  "tempKeep": []
+}

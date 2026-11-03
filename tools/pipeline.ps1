@@ -5,9 +5,10 @@
 # One copy, two callers, no drift -- the same split the sibling FFT mods use.
 #
 # This mod is DATA-ONLY (no DLL), so the automated pipeline is gate (validate
-# data/grenades.json) -> generate (emit the two table XMLs) -> the ledger test
-# gate (TodoContractTests; the only .NET piece, no runtime project behind it).
-# All three run on CI with no FF16Tools. The .en.nxd NAME tables and the recolored
+# data/grenades.json) -> generate (emit the two table XMLs) -> the shared gates
+# (the rulebook's manifest, format, contract test and temp leftover checks, from
+# gates/pipeline/gates.ps1; the test project is the only .NET piece here).
+# All of it runs on CI with no FF16Tools. The .en.nxd NAME tables and the recolored
 # icons are rebuilt by the SEPARATE FF16Tools steps (tools/patch_names.py,
 # tools/patch_ability_names.py, tools/recolor_icons.py) and shipped from their
 # committed copies in the mod tree -- run those by hand when you edit a grenade's
@@ -16,6 +17,11 @@
 # Repo root, resolved from this file's own location so everything works no
 # matter what cwd the caller happens to be in when it dot-sources us.
 $PipelineRepoRoot = Split-Path -Parent $PSScriptRoot
+
+# The rulebook's gate functions load first, so the repo's own gates below can call them.
+# The health gate stays out. It measures C# and this mod has none, a gap the rulebook's
+# own ledger records.
+. "$PSScriptRoot\..\gates\pipeline\gates.ps1"
 
 # The pipeline's one voice on the PowerShell side (docs/LOGGING.md is the contract;
 # tools/lib/say.py is the Python twin). Every headline a script prints goes through
@@ -77,19 +83,22 @@ function Invoke-DataPipeline {
     }
 }
 
-function Invoke-UnitTestGate {
-    # The contract-test gate (the work-ledger enforcement in
-    # FFTOffensiveChemist.Tests). ONE canonical flag set, so a test that passes
-    # locally passed under the same conditions everywhere.
+function Invoke-SharedGates {
+    # The rulebook's gates in their fixed order, inside their own temp folder. ONE
+    # place for both callers, so deploy and package run the same checks.
     param(
         [Parameter(Mandatory = $true)][ValidateSet('DEPLOY', 'PACKAGE')]
         [string]$FailVerb
     )
 
-    Write-OcSay test "running the contract tests (FFTOffensiveChemist.Tests)..."
-    & dotnet test "$PipelineRepoRoot\FFTOffensiveChemist.Tests\FFTOffensiveChemist.Tests.csproj" --nologo -v q
-    if ($LASTEXITCODE -ne 0) {
-        throw "[Offensive Chemist] [test] FAIL: contract tests went red (see above); REFUSING TO ${FailVerb}."
+    Write-OcSay test "running the shared gates under rulebook $GatesVersion (manifest, format, contract tests, temp leftovers)..."
+    $gateTemp = Enter-GateTemp
+    try {
+        Invoke-ManifestGate -FailVerb $FailVerb
+        Invoke-FormatGate -FailVerb $FailVerb
+        Invoke-UnitTestGate -FailVerb $FailVerb
+        Invoke-TempLeftoverGate -FailVerb $FailVerb -GateTemp $gateTemp
     }
-    Write-OcSay test "PASS: contract tests green." Green
+    finally { Exit-GateTemp -State $gateTemp }
+    Write-OcSay test "PASS: shared gates green under rulebook $GatesVersion." Green
 }
