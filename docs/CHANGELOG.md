@@ -8,6 +8,17 @@ with a date and no hash.
 
 ## 1.2.0 cycle
 
+- [OC-6] WONTFIX 2026-10-16: A player reported the game crashing when entering a battle from the
+  overworld after the September game update that removed Denuvo, and asked for a mod update. The
+  crash was the mod loader's, not this mod's: Nenkai's fftivc.utility.modloader 1.7.3 (2026-09-20)
+  added support for the Denuvo free exe but fetched the ItemConsumableData table wrongly, and
+  1.7.4 (2026-09-29, the day after the report) fixed exactly that. Offensive Chemist is the one
+  mod here that edits ItemConsumableData, so it was the visible victim. On the owner's box with
+  loader 1.7.5 and game buildid 24304444, two battles entered from the world map with this mod
+  loaded were crash free and every one of its 19 table cells was applied (Reloaded logs
+  2026-10-16 03:58 and 04:42). No change to this mod; players update the loader, which Reloaded
+  does automatically.
+
 - [OC-4] SHIPPED f83f9d5 2026-07-21: the build scripts now speak with one shared voice, so
   every line says which stage is talking and a failure reads the same as in the sibling
   mods; the runtime logger and flight recorder are recorded WONTFIX because this data-only
