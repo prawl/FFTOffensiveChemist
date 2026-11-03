@@ -20,6 +20,16 @@ in scope yet; the owner locks any player-facing scope separately.
 - [ ] The release zip carries the real Nexus mod id (the NexusModId placeholder 0 replaced) so
       Vortex shows the mod's version instead of a warning icon.
 
+### 3. Shared rulebook (OC-18)
+- [x] The mod builds under the sibling mods' shared rulebook (gates/ at v0.1.1): the manifest,
+      format, contract test and temp leftover gates run in BuildLinked.ps1 / Publish.ps1 / CI
+      (shipped bb6f60d, 2026-11-03).
+
+### 4. Linux friendly release zip (OC-7)
+- [ ] A release zip built on Windows unpacks on Linux into the prawl.fft.offensivechemist
+      folder, every entry name with forward slashes.
+
 ## OUT (deferred, tracked in the ledger)
 
 - Manifest-driven zip content floors (OC-3).
+- Golden copy tests of the generated tables (OC-19) and the paperwork test audit (OC-20).

@@ -8,6 +8,19 @@ with a date and no hash.
 
 ## 1.2.0 cycle
 
+- [OC-18] SHIPPED bb6f60d 2026-11-03: the mod now builds under the same shared rulebook as the
+  sibling mods, so a drifted rule copy, a malformed ledger, an unformatted test project or a
+  leftover temp folder refuses to deploy or package, and the comment and style rules hold here
+  too. The logger and the code health floor stay out, since this data-only mod has no C# to log
+  from or to measure. (Tech: gates/ subtree at v0.1.1; rules.json with tools/ as prod; the
+  ledger, style and comment contracts linked by name into FFTOffensiveChemist.Tests;
+  Invoke-SharedGates in tools/pipeline.ps1 runs the manifest, format, unit test and temp
+  leftover gates; CI run 41591469591 green on the merge 2122be3; MG-17 in the rulebook records
+  the Python gap.)
+- [OC-5] SHIPPED bb6f60d 2026-11-03: a ledger row pasted by accident under Walled or Format now
+  fails the contract instead of hiding from every scan, the same decision the sibling mods took.
+  (Tech: the shared TodoContractTests' entry shape sweep over the non-entry sections, proven by
+  a planted stray row going red and its removal green.)
 - [OC-6] WONTFIX 2026-10-16: A player reported the game crashing when entering a battle from the
   overworld after the September game update that removed Denuvo, and asked for a mod update. The
   crash was the mod loader's, not this mod's: Nenkai's fftivc.utility.modloader 1.7.3 (2026-09-20)
