@@ -10,14 +10,23 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
 
 ## Now (release: 1.2.0)
 
-- **[OC-2] Give the mod its real Nexus identity before any Nexus upload** (opened 2026-07-21) [QUEUED]
+- **[OC-18] Take the shared rulebook so this mod builds under the same rules as the others** (opened 2026-11-02) [QUEUED]
+  - Done means: the mod carries gates/ as a subtree with its rules.json, compiles the shared logger
+    and tests in, imports the shared build settings and style file, and every gate runs green
+    locally and in CI with today's numbers recorded as the floor. No gameplay code changes. (Tech:
+    the hookup steps in gates/README.md; rules.json names prod, tests, projects and the OC prefix;
+    floor.json and the comment budget baseline come from today's files.)
+  - Verify: BuildLinked.ps1 and CI green on the hookup commit; the health numbers equal what the
+    repo's own copy printed before the swap; the build log names the rulebook version.
+
+## Backlog
+
+- [OC-2] 2026-07-21: Give the mod its real Nexus identity before any Nexus upload. Parked 2026-11-02 by the owner's quality pause; it was QUEUED in Now.
   - Done means: the release zip is named so Vortex can read the mod's id and version instead of
     showing a warning icon with no version. (Tech: Publish.ps1's NexusModId parameter still
     defaults to the placeholder 0; register the mod on Nexus and bake in the real id.)
   - Verify: a zip built with the real id follows the Nexus filename convention and Vortex shows
     its version after a hand-install; the owner confirms on the first real upload.
-
-## Backlog
 
 - [OC-3] 2026-07-21: The release-zip check only asks "are the named files present", so a
   half-empty zip could still ship; evaluate porting the sibling mods' manifest-driven content
@@ -32,6 +41,7 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
   there was yes, they fail the contract: an entry-shape regex swept over the non-entry
   sections, proven by a planted stray going red and the revert going green. The port is that
   one test with the id prefix swapped to OC.
+
 - [OC-7] 2026-10-26: A Linux player who unzips a release built on the Windows desktop gets loose
   files named with backslashes instead of a prawl.fft.offensivechemist folder, so Reloaded never
   sees the mod; the GitHub CI zip is unaffected because pwsh writes forward slashes. Found live
