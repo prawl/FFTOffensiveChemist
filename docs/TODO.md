@@ -23,18 +23,17 @@ release ship gate lives in docs/RELEASE_SCOPE.md; Now is the in-flight subset.
 
 - [OC-19] 2026-11-02: Test what the mod ships, not only how its files are written. Today the C#
   tests check only the to-do ledger and the log lines, so nothing fails if the grenade tables come
-  out wrong. Add tests that feed gate.py each kind of bad grenade data and expect a refusal, and
-  that run generate.py and compare its XML files to committed golden copies. (Tech: one bad input
-  per gate.py check, such as a duplicate id, a consumableId or abilityKey that breaks its rule, a
-  StatusEffectId outside 1 to 255, a Z outside 0 to 100, a non ASCII or overlong name, a bad icon
-  tint or source, and a bad shop string; golden copies of ItemConsumableData.xml and ItemData.xml;
-  run both from tools/pipeline.ps1 so CI fails on any difference.)
-  - Done means: every gate.py check has a test that proves it refuses its bad input, and a change
-    to generate.py's output fails the build until the golden copies are updated on purpose.
-  - Verify: each gate test goes red when its check is removed and green on revert; one hand edit
-    to a generated XML fails the golden test; CI green.
+  out wrong. Run generate.py and compare its XML files to committed golden copies, so a change to
+  the output fails the build until the copies are updated on purpose. The per check refusal tests
+  for gate.py are dropped: for a finished mod the golden copies catch the break that matters, and
+  a refusal test for each check of a gate that is not changing is upkeep. Owner 2026-11-02,
+  narrowed to the golden copies. (Tech: golden copies of ItemConsumableData.xml and ItemData.xml;
+  run the compare from tools/pipeline.ps1 so CI fails on any difference.)
+  - Done means: a change to generate.py's output fails the build until the golden copies are
+    updated on purpose.
+  - Verify: one hand edit to a generated XML fails the golden test and the revert passes; CI green.
 
-- [OC-20] 2026-11-02: Once OC-19's product tests land, audit the tests that check markdown and
+- [OC-20] 2026-11-02: Once OC-19's golden tests land, audit the tests that check markdown and
   source text, and drop any that guard paperwork rather than the mod. Every gate is code to
   maintain, and today every test in this repo is that kind. (Tech: TodoContractTests and
   LogContractTests are the whole C# suite; keep what stops a real mistake and name each test
